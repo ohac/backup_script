@@ -2,6 +2,9 @@
 
 set -e
 
+THISDIR=`dirname "$0"`
+cd $THISDIR
+
 # settings
 file=backup.tar.gz.gpg
 recipient=B8440253
@@ -9,12 +12,13 @@ s3Key=xxxxxxxxxxxxxxxxxxxx
 s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 bucket=sighash
 targetdir=data
+sudocmd="sudo -u core"
 
 if [ -e settings ]; then
   . ./settings
 fi
 
-sudo tar zc "${targetdir}" | gpg -e -r "${recipient}" > "${file}"
+sudo tar zc "${targetdir}" | ${sudocmd} gpg -e -r "${recipient}" > "${file}"
 name="${file}"
 resource="/${bucket}/${name}"
 contentType="application/pgp-encrypted"

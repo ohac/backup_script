@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup to S3
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/home/core/backup_script/backup.sh
+
+[Install]
+WantedBy=multi-user.target

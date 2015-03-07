@@ -4,3 +4,4 @@ s3Key=xxxxxxxxxxxxxxxxxxxx
 s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 bucket=mybucket
 targetdir=/home/core/data
+sudocmd="sudo -u core"
