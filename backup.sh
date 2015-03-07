@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh -e
+
+set -e
 
 # settings
 file=backup.tar.gz.gpg
@@ -7,6 +9,10 @@ s3Key=xxxxxxxxxxxxxxxxxxxx
 s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 bucket=sighash
 targetdir=data
+
+if [ -e settings ]; then
+  . ./settings
+fi
 
 sudo tar zc "${targetdir}" | gpg -e -r "${recipient}" > "${file}"
 name="${file}"

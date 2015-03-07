@@ -1,0 +1,6 @@
+file=myserver.tar.gz.gpg
+recipient=someone@example.com
+s3Key=xxxxxxxxxxxxxxxxxxxx
+s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+bucket=mybucket
+targetdir=/home/core/data
