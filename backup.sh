@@ -18,7 +18,17 @@ if [ -e settings ]; then
   . ./settings
 fi
 
-sudo tar zc "${targetdir}" | ${sudocmd} gpg -e -r "${recipient}" > "${file}"
+taropt=""
+if [ -e "${file}" ]; then
+  if [ `date +%d` -ne '01' ]; then
+    after=`ls -on --fu ${file} | awk '{print $5}'`
+    taropt="-N ${after}"
+    file="diff-${file}"
+  fi
+fi
+
+sudo tar -c --gzip ${taropt} "${targetdir}" \
+  | ${sudocmd} gpg -e -r "${recipient}" > "${file}"
 name="${file}"
 resource="/${bucket}/${name}"
 contentType="application/pgp-encrypted"
