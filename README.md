@@ -1,4 +1,9 @@
-    gpg --import B8449253.asc
+    gpg --keyserver hkp://subkeys.pgp.net --recv-key xxxxxxxx
+    #gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-key xxxxxxxx
+    #gpg --keyserver hkp://keyserver.kjsl.com:80 --recv-key xxxxxxxx
+    cat >otrust.txt
+    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:6:
+    ^D
     gpg --import-ownertrust < otrust.txt
     sudo cp backup.service /etc/systemd/system/
     sudo cp backup.timer /etc/systemd/system/
