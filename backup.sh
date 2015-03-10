@@ -7,37 +7,66 @@ cd $THISDIR
 
 # settings
 file=backup.tar.gz.gpg
-recipient=B8440253
+recipients="-r B8440253"
+uploadto=s3
 s3Key=xxxxxxxxxxxxxxxxxxxx
 s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 bucket=sighash
 targetdir=data
 sudocmd="sudo -u core"
+splitsize=1024m
 
 if [ -e settings ]; then
   . ./settings
 fi
 
 taropt=""
-if [ -e "${file}" ]; then
+suffix=full
+fullname="${file}.${suffix}.aa"
+if [ -e "${fullname}" ]; then
   if [ `date +%d` -ne '01' ]; then
-    after=`ls -on --fu ${file} | awk '{print $5}'`
+    after=`ls -on --fu "${fullname}" | awk '{print $5}'`
     taropt="-N ${after}"
-    file="diff-${file}"
+    suffix=diff
   fi
 fi
+file="${file}.${suffix}"
 
-sudo tar -c --gzip ${taropt} "${targetdir}" \
-  | ${sudocmd} gpg -e -r "${recipient}" > "${file}"
-name="${file}"
-resource="/${bucket}/${name}"
-contentType="application/pgp-encrypted"
-dateValue=`date -R`
-stringToSign="PUT\n\n${contentType}\n${dateValue}\n${resource}"
-signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${s3Secret} -binary | base64`
-curl -X PUT -T "${file}" \
-  -H "Host: ${bucket}.s3.amazonaws.com" \
-  -H "Date: ${dateValue}" \
-  -H "Content-Type: ${contentType}" \
-  -H "Authorization: AWS ${s3Key}:${signature}" \
-  https://${bucket}.s3.amazonaws.com/${name}
+sudo tar -c --gzip ${taropt} "${targetdir}" --exclude-caches \
+  | ${sudocmd} gpg -e ${recipients} \
+  | split -b ${splitsize} - "${file}."
+
+upload() {
+  name="$1"
+  case $uploadto in
+    s3)
+      resource="/${bucket}/${name}"
+      contentType="application/octet-stream"
+      dateValue=`date -R`
+      stringToSign="PUT\n\n${contentType}\n${dateValue}\n${resource}"
+      signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${s3Secret} -binary | base64`
+      curl -X PUT -T "${name}" \
+        -H "Host: ${bucket}.s3.amazonaws.com" \
+        -H "Date: ${dateValue}" \
+        -H "Content-Type: ${contentType}" \
+        -H "Authorization: AWS ${s3Key}:${signature}" \
+        https://${bucket}.s3.amazonaws.com/${name}
+      ;;
+    torrentsync)
+      lim="1m"
+      tracker="http://torrent.example.com:6969/announce"
+      dateValue=`date +%Y%m%d_%H%M%S`
+      prefix="snapshot_${dateValue}_"
+      file="$1"
+      name="${prefix}$1"
+      curl --limit-rate ${lim} \
+        -F "tracker=${tracker}" \
+        -F "file=@${file};filename=${name}" \
+        http://torrentsync.example.com/upload
+      ;;
+  esac
+}
+
+for splitfile in ${file}.*; do
+  upload $splitfile
+done

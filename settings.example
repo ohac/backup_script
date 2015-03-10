@@ -1,5 +1,6 @@
 file=myserver.tar.gz.gpg
-recipient=someone@example.com
+recipients="-r FFFFFFFF"
+uploadto=s3
 s3Key=xxxxxxxxxxxxxxxxxxxx
 s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 bucket=mybucket
