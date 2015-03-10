@@ -5,16 +5,26 @@ set -e
 THISDIR=`dirname "$0"`
 cd $THISDIR
 
-# settings
+# settings (common)
 file=backup.tar.gz.gpg
 recipients="-r B8440253"
-uploadto=s3
-s3Key=xxxxxxxxxxxxxxxxxxxx
-s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-bucket=sighash
 targetdir=data
 sudocmd="sudo -u core"
 splitsize=1024m
+uploadto=s3
+#uploadto=torrentsync
+
+# settings (s3)
+s3Key=xxxxxxxxxxxxxxxxxxxx
+s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+bucket=sighash
+
+# settings (torrentsync)
+lim="1m"
+tracker="http://torrent.example.com:6969/announce"
+datestr=`date +%Y%m%d_%H%M%S`
+prefix="snapshot_${datestr}_"
+uploader="http://torrentsync.example.com/upload"
 
 if [ -e settings ]; then
   . ./settings
@@ -53,16 +63,12 @@ upload() {
         https://${bucket}.s3.amazonaws.com/${name}
       ;;
     torrentsync)
-      lim="1m"
-      tracker="http://torrent.example.com:6969/announce"
-      dateValue=`date +%Y%m%d_%H%M%S`
-      prefix="snapshot_${dateValue}_"
       file="$1"
       name="${prefix}$1"
       curl --limit-rate ${lim} \
         -F "tracker=${tracker}" \
         -F "file=@${file};filename=${name}" \
-        http://torrentsync.example.com/upload
+        "${uploader}"
       ;;
   esac
 }
