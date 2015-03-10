@@ -1,8 +1,19 @@
+# settings (common)
 file=myserver.tar.gz.gpg
 recipients="-r FFFFFFFF"
+targetdir=/home/core/data
+sudocmd="sudo -u core"
+splitsize=1024m
 uploadto=s3
+
+# settings (s3)
 s3Key=xxxxxxxxxxxxxxxxxxxx
 s3Secret=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 bucket=mybucket
-targetdir=/home/core/data
-sudocmd="sudo -u core"
+
+# settings (torrentsync)
+lim="1m"
+tracker="http://torrent.example.com:6969/announce"
+datestr=`date +%Y%m%d_%H%M%S`
+prefix="snapshot_${datestr}_"
+uploader="http://torrentsync.example.com/upload"
