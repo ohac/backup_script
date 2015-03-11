@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash
 
 set -e
 
@@ -8,7 +8,8 @@ cd $THISDIR
 # settings (common)
 file=backup.tar.gz.gpg
 recipients="-r B8440253"
-targetdir=data
+targetdirs=data data2
+sudoroot="sudo"
 sudocmd="sudo -u core"
 splitsize=1024m
 uploadto=s3
@@ -42,7 +43,7 @@ if [ -e "${fullname}" ]; then
 fi
 file="${file}.${suffix}"
 
-sudo tar -c --gzip ${taropt} "${targetdir}" --exclude-caches \
+${sudoroot} tar -c --gzip ${taropt} ${targetdirs} --exclude-caches \
   | ${sudocmd} gpg -e ${recipients} \
   | split -b ${splitsize} - "${file}."
 

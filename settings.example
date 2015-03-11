@@ -2,6 +2,7 @@
 file=myserver.tar.gz.gpg
 recipients="-r FFFFFFFF"
 targetdir=/home/core/data
+sudoroot=""
 sudocmd="sudo -u core"
 splitsize=1024m
 uploadto=s3
