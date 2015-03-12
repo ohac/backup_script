@@ -8,7 +8,7 @@ cd $THISDIR
 # settings (common)
 file=backup.tar.gz.gpg
 recipients="-r B8440253"
-targetdirs=data data2
+targetdirs="data data2"
 sudoroot="sudo"
 sudocmd="sudo -u core"
 splitsize=1024m
