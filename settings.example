@@ -1,5 +1,5 @@
 # settings (common)
-file=myserver.tar.gz.gpg
+file=${HOSTNAME}.tar.gz.gpg
 recipients="-r FFFFFFFF"
 targetdir=/home/core/data
 sudoroot=""
