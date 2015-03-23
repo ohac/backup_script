@@ -37,7 +37,7 @@ fullname="${file}.${suffix}.aa"
 if [ -e "${fullname}" ]; then
   if [ `date +%d` -ne '01' ]; then
     after=`ls -on --fu "${fullname}" | awk '{print $5}'`
-    taropt="-N ${after}"
+    taropt="--newer-mtime ${after}"
     suffix=diff
   fi
 fi
