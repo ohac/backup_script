@@ -43,7 +43,7 @@ if [ -e "${fullname}" ]; then
 fi
 file="${file}.${suffix}"
 
-${sudoroot} tar -c --gzip ${taropt} ${targetdirs} --exclude-caches \
+${sudoroot} tar -c --gzip ${taropt} --exclude-caches ${targetdirs} \
   | ${sudocmd} gpg -e ${recipients} \
   | split -b ${splitsize} - "${file}."
 
