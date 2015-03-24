@@ -35,7 +35,13 @@ taropt=""
 suffix=full
 fullname="${file}.${suffix}.aa"
 if [ -e "${fullname}" ]; then
-  if [ `date +%d` -ne '01' ]; then
+  mtime=`ls -on --time-style=+%s "${fullname}" | awk '{print $5}'`
+  set +e
+  rand=$((16#$(openssl rand -hex 1)))
+  ((rand=rand%7))
+  ((expires=mtime+(rand+30)*24*60*60))
+  set -e
+  if [ `date +%s` -lt $expires ]; then
     after=`ls -on --fu "${fullname}" | awk '{print $5}'`
     taropt="--newer-mtime ${after}"
     suffix=diff
