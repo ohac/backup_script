@@ -1,7 +1,7 @@
 # settings (common)
 file=${HOSTNAME}.tar.gz.gpg
 recipients="-r FFFFFFFF"
-targetdir=/home/core/data
+targetdirs="/home/core/data"
 sudoroot=""
 sudocmd="sudo -u core"
 splitsize=1024m
