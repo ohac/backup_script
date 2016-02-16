@@ -33,25 +33,34 @@ fi
 
 taropt=""
 suffix=full
-fullname="${file}.${suffix}.aa"
-if [ -e "${fullname}" ]; then
-  mtime=`ls -on --time-style=+%s "${fullname}" | awk '{print $5}'`
-  set +e
-  ((rand=RANDOM%7))
-  ((expires=mtime+(rand+30)*24*60*60))
-  set -e
-  if [ `date +%s` -lt $expires ]; then
-    after=`ls -on --fu "${fullname}" | awk '{print $5}'`
-    taropt="--newer-mtime ${after}"
-    suffix=diff
-  fi
-fi
-file="${file}.${suffix}"
+dryrun="bash -c"
 
-${sudoroot} rm -f ${file}.*
-${sudoroot} tar -c --gzip ${taropt} --exclude-caches ${targetdirs} \
-  | ${sudocmd} gpg -e ${recipients} \
-  | split -b ${splitsize} - "${file}."
+if [ -z $1 ]; then
+  echo '# normal mode'
+  fullname="${file}.${suffix}.aa"
+  if [ -e "${fullname}" ]; then
+    mtime=`ls -on --time-style=+%s "${fullname}" | awk '{print $5}'`
+    set +e
+    ((rand=RANDOM%7))
+    ((expires=mtime+(rand+30)*24*60*60))
+    set -e
+    if [ `date +%s` -lt $expires ]; then
+      after=`ls -on --fu "${fullname}" | awk '{print $5}'`
+      taropt="--newer-mtime ${after}"
+      suffix=diff
+    fi
+  fi
+  file="${file}.${suffix}"
+  ${sudoroot} rm -f ${file}.*
+  ${sudoroot} tar -c --gzip ${taropt} --exclude-caches ${targetdirs} \
+    | ${sudocmd} gpg -e ${recipients} \
+    | split -b ${splitsize} - "${file}."
+else
+  echo '# re-upload mode'
+  suffix=$1
+  dryrun="echo"
+  file="${file}.${suffix}"
+fi
 
 upload() {
   name="$1"
@@ -62,20 +71,20 @@ upload() {
       dateValue=`date -R`
       stringToSign="PUT\n\n${contentType}\n${dateValue}\n${resource}"
       signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${s3Secret} -binary | base64`
-      curl -X PUT -T "${name}" \
-        -H "Host: ${bucket}.s3.amazonaws.com" \
-        -H "Date: ${dateValue}" \
-        -H "Content-Type: ${contentType}" \
-        -H "Authorization: AWS ${s3Key}:${signature}" \
-        https://${bucket}.s3.amazonaws.com/${name}
+      $dryrun "curl -X PUT -T '${name}' \
+        -H 'Host: ${bucket}.s3.amazonaws.com' \
+        -H 'Date: ${dateValue}' \
+        -H 'Content-Type: ${contentType}' \
+        -H 'Authorization: AWS ${s3Key}:${signature}' \
+        https://${bucket}.s3.amazonaws.com/${name}"
       ;;
     torrentsync)
       file="$1"
       name="${prefix}$1"
-      curl --limit-rate ${lim} \
-        -F "tracker=${tracker}" \
-        -F "file=@${file};filename=${name}" \
-        "${uploader}"
+      $dryrun "curl --limit-rate ${lim} \
+        -F 'tracker=${tracker}' \
+        -F 'file=@${file};filename=${name}' \
+        '${uploader}'"
       ;;
   esac
 }
