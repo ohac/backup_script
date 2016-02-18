@@ -15,6 +15,4 @@ bucket=mybucket
 # settings (torrentsync)
 lim="1m"
 tracker="http://torrent.example.com:6969/announce"
-datestr=`date +%Y%m%d_%H%M%S`
-prefix="snapshot_${datestr}_"
 uploader="http://torrentsync.example.com/upload"

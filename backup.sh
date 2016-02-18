@@ -23,8 +23,6 @@ bucket=sighash
 # settings (torrentsync)
 lim="1m"
 tracker="http://torrent.example.com:6969/announce"
-datestr=`date +%Y%m%d_%H%M%S`
-prefix="snapshot_${datestr}_"
 uploader="http://torrentsync.example.com/upload"
 
 if [ -e settings ]; then
@@ -80,7 +78,7 @@ upload() {
       ;;
     torrentsync)
       file="$1"
-      name="${prefix}$1"
+      name="${prefix2}$1"
       $dryrun "curl --limit-rate ${lim} \
         -F 'tracker=${tracker}' \
         -F 'file=@${file};filename=${name}' \
@@ -90,5 +88,9 @@ upload() {
 }
 
 for splitfile in ${file}.*; do
+  if [ -z $prefix2 ]; then
+    datestr=`ls -on --time-style=+%Y%m%d_%H%M%S "${splitfile}" | awk '{print $5}'`
+    prefix2="snapshot_${datestr}_"
+  fi
   upload $splitfile
 done
